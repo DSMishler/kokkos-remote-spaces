@@ -436,8 +436,7 @@ struct System {
         : T(T_), dT(dT_), dt(dt_) {}
     KOKKOS_FUNCTION
     void operator()(int me, int x, int y, int z, double& sum_T) const {
-      sum_T += T(me, x, y, z);
-      // printf("just added %lf\n", T(me,x,y,z));
+      sum_T += T(me, x, y, z); /* this runs super slow on weaver. */
       T(me, x, y, z) += dt * dT(me, x, y, z);
     }
   };
@@ -483,17 +482,6 @@ struct System {
       time_surface += time_c - time_b;
       time_compute += time_d - time_c;
       T_ave /= 1e-9 * (X * Y * Z);
-      // if((t%I == 0 || t == N))
-      // {
-      // Kokkos::deep_copy(T_h, T);
-      // printf("process (%d) my T(0,0,0,0):    %lf\n", comm.me,T_h(0, 0, 0,
-      // 0)); printf("process (%d) my T(0,0,1,1):    %lf\n", comm.me,T_h(0, 0,
-      // 1, 1)); printf("process (%d) my T(1,0,0,0):    %lf\n", comm.me,T_h(0,
-      // 0, 0, 0)); printf("process (%d) my T(0,1,0,0):    %lf\n",
-      // comm.me,T_h(0, 1, 0, 0)); printf("process (%d) my T(0,1,1,1): %lf\n",
-      // comm.me,T_h(0, 1, 1, 1)); printf("process (%d) my T(0,50,50,50):
-      // %lf\n", comm.me,T_h(0, 50, 50, 50));
-      // }
       if ((t % I == 0 || t == N) && (comm.me == 0)) {
         double time = timer.seconds();
         printf("%d T=%lf Time (%lf %lf)\n", t, T_ave, time, time - old_time);
