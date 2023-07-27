@@ -151,7 +151,7 @@ struct System {
     X = Y = Z = 200;
     X_lo = Y_lo = Z_lo = 0;
     X_hi = Y_hi = Z_hi = X;
-    N                  = 10000;
+    N                  = 1000;
     I                  = 100;
     T                  = Kokkos::View<double***>();
     dT                 = Kokkos::View<double***>();
