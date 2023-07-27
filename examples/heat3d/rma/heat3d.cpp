@@ -44,7 +44,7 @@ struct CommHelper {
     ny = 0;
     nz = 0;
 
-    printf("NumRanks: %i Me: %i", nranks, me);
+    printf("NumRanks: %i Me: %i\n", nranks, me);
   }
 };
 
@@ -225,7 +225,7 @@ struct System {
     using policy_t = Kokkos::MDRangePolicy<Kokkos::Rank<3>, ComputeAllDT, int>;
     Kokkos::parallel_for(
         "ComputeAllDT",
-        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}, {16, 8, 8}),
+        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}),
         *this);
   }
 
@@ -249,7 +249,7 @@ struct System {
     double my_T;
     Kokkos::parallel_reduce(
         "ComputeT",
-        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}, {10, 10, 10}),
+        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}),
         computeT(T, dT, dt), my_T);
     double sum_T;
     RemoteSpace_t().fence();
