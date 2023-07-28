@@ -572,7 +572,7 @@ struct System {
     Kokkos::parallel_reduce(
         "ComputeT",
         Kokkos::Experimental::require(
-            policy_t(E_bulk, {0, 0, 0}, {X, Y, Z}),
+            policy_t(E_bulk, {0, 0, 0}, {X, Y, Z}, {10, 10, 10}),
             Kokkos::Experimental::WorkItemProperty::HintLightWeight),
         ComputeT(T, dT, dt), my_T);
     double sum_T;

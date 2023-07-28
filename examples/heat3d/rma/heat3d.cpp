@@ -24,7 +24,7 @@
 using RemoteSpace_t = Kokkos::Experimental::DefaultRemoteMemorySpace;
 using RemoteView_t  = Kokkos::View<double***, RemoteSpace_t>;
 using HostView_t    = typename RemoteView_t::HostMirror;
-// Kokkos::View<double ***, Kokkos::HostSpace>;
+using LocalView_t   = Kokkos::View<double***>;
 
 struct CommHelper {
   MPI_Comm comm;
@@ -75,7 +75,8 @@ struct System {
   int I;
 
   // Temperature and delta Temperature
-  RemoteView_t T, dT;
+  RemoteView_t T;
+  RemoteView_t dT;
   HostView_t T_h;
 
   // Initial Temmperature
@@ -225,14 +226,15 @@ struct System {
     using policy_t = Kokkos::MDRangePolicy<Kokkos::Rank<3>, ComputeAllDT, int>;
     Kokkos::parallel_for(
         "ComputeAllDT",
-        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}),
+        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}, {16, 8, 8}),
         *this);
   }
 
   // Some compilers have deduction issues if this were just a tagget operator
   // So it is instead a full Functor
   struct computeT {
-    RemoteView_t T, dT;
+    RemoteView_t T;
+    RemoteView_t dT;
     double dt;
     computeT(RemoteView_t T_, RemoteView_t dT_, double dt_)
         : T(T_), dT(dT_), dt(dt_) {}
@@ -249,7 +251,7 @@ struct System {
     double my_T;
     Kokkos::parallel_reduce(
         "ComputeT",
-        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}),
+        policy_t({my_lo_x, 0, 0}, {my_hi_x, Y, Z}, {10, 10, 10}),
         computeT(T, dT, dt), my_T);
     double sum_T;
     RemoteSpace_t().fence();

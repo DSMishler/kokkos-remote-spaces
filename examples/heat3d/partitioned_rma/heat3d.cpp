@@ -164,7 +164,7 @@ struct System {
     X_ra               = X;
     Y_ra               = Y;
     Z_ra               = Z;
-    N                  = 10000;
+    N                  = 1000;
     I                  = 100;
     T_h                = HostView_t();
     T                  = RemoteView_t();
