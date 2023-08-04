@@ -277,13 +277,17 @@ struct System {
     for (int t = 0; t <= N; t++) {
       if (t > N / 2) P = 0.0;
       pack_T_halo();
+      Kokkos::fence();
+      MPI_Barrier(comm.comm);
       time_a = timer.seconds();
       compute_inner_dT();
       Kokkos::fence();
       time_b = timer.seconds();
       exchange_T_halo();
+      MPI_Barrier(comm.comm);
       compute_surface_dT();
       Kokkos::fence();
+      MPI_Barrier(comm.comm);
       time_c       = timer.seconds();
       double T_ave = compute_T();
       time_d       = timer.seconds();
@@ -576,6 +580,7 @@ struct System {
             Kokkos::Experimental::WorkItemProperty::HintLightWeight),
         ComputeT(T, dT, dt), my_T);
     double sum_T;
+    MPI_Barrier(comm.comm);
     MPI_Allreduce(&my_T, &sum_T, 1, MPI_DOUBLE, MPI_SUM, comm.comm);
     return sum_T;
   }
