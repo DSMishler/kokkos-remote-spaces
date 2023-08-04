@@ -276,20 +276,28 @@ struct System {
     time_inner = time_surface = time_compute = 0.0;
     for (int t = 0; t <= N; t++) {
       if (t > N / 2) P = 0.0;
-      pack_T_halo();
+      pack_T_halo(); // 1
       Kokkos::fence();
       MPI_Barrier(comm.comm);
+      printf("rank %d iter %d: post barrier 1\n", comm.me, t);
       time_a = timer.seconds();
-      compute_inner_dT();
+      compute_inner_dT(); // 2
       Kokkos::fence();
+      MPI_Barrier(comm.comm);
+      printf("rank %d iter %d: post barrier 2\n", comm.me, t);
       time_b = timer.seconds();
-      exchange_T_halo();
-      MPI_Barrier(comm.comm);
-      compute_surface_dT();
+      exchange_T_halo(); // 3
       Kokkos::fence();
       MPI_Barrier(comm.comm);
+      printf("rank %d iter %d: post barrier 3\n", comm.me, t);
+      compute_surface_dT(); // 4
+      Kokkos::fence();
+      MPI_Barrier(comm.comm);
+      printf("rank %d iter %d: post barrier 4\n", comm.me, t);
       time_c       = timer.seconds();
-      double T_ave = compute_T();
+      double T_ave = compute_T(); // 5
+      MPI_Barrier(comm.comm);
+      printf("rank %d iter %d: post barrier 5\n", comm.me, t);
       time_d       = timer.seconds();
       time_inner += time_b - time_a;
       time_surface += time_c - time_b;
@@ -302,6 +310,7 @@ struct System {
                time_inner + time_surface, time_compute);
         old_time = time;
       }
+      MPI_Barrier(comm.comm);
     }
   }
 
